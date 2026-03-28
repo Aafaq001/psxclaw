@@ -1,3 +1,4 @@
+export const maxDuration = 60; // Extend Vercel Serverless Function timeout to 60s
 import { NextResponse } from 'next/server';
 
 async function fetchRecentNews(ticker) {
