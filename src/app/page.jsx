@@ -326,15 +326,15 @@ Style rules: Use Pakistani Rupee ₨ for all prices. Reference KSE-100 context t
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-3-5-sonnet-20241022",
           max_tokens: 1000,
           ticker: activeTicker,
           messages: [{ role: "user", content: buildPrompt() }],
         }),
       });
 
-      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Server responded with ${res.status}`);
       const text = data.content?.[0]?.text || "";
       if (!text) throw new Error("Empty response from AI.");
       setReport(text);

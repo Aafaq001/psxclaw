@@ -60,6 +60,10 @@ export async function POST(req) {
     });
     
     const data = await response.json();
+    if (data.error) {
+      console.error("[Anthropic API Error]:", data.error);
+      return NextResponse.json({ error: data.error.message || "Anthropic API Error" }, { status: 400 });
+    }
     return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
