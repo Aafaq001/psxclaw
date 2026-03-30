@@ -205,6 +205,7 @@ export default function PSXClaw() {
   const [timeframe, setTimeframe] = useState("3 Months");
   const [risk, setRisk] = useState("Moderate");
   const [entryPrice, setEntryPrice] = useState("");
+  const [manualPrice, setManualPrice] = useState("");
 
   // States for Validation
   const [livePrice, setLivePrice] = useState(null);
@@ -221,7 +222,7 @@ export default function PSXClaw() {
   const activeTicker = custom.trim().toUpperCase() || ticker;
   const stockData = STOCKS.find(s => s.ticker === activeTicker);
   const stratData = STRATEGIES.find(s => s.value === strategy);
-  const finalPrice = livePrice || "";
+  const finalPrice = manualPrice || livePrice || "";
 
   const LOAD_STEPS = ["Reading inputs", "Building prompt", "Consulting AI", "Formatting report"];
 
@@ -407,8 +408,8 @@ Use these EXACT section headers (## format):
             )}
             
             {isValidTicker && activeTicker && livePrice && (
-              <div style={{ marginBottom: 28, fontSize: 14, color: 'var(--green)', fontWeight: 600 }}>
-                Live Price for {activeTicker}: ₨{livePrice}
+              <div style={{ marginBottom: 28, fontSize: 13, color: 'var(--green)', fontWeight: 500, background: 'var(--green-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--green-bd)', display: 'inline-block' }}>
+                <span style={{ opacity: 0.8 }}>Live {activeTicker}:</span> ₨{livePrice}
               </div>
             )}
 
@@ -452,27 +453,41 @@ Use these EXACT section headers (## format):
 
             <hr className="section-divider" />
 
-            <div className="row2" style={{ marginBottom: 28, gridTemplateColumns: "1fr 1fr" }}>
+            <div className="row2" style={{ marginBottom: 20 }}>
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">5</span>Buy Price (Optional) &nbsp;
-                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>₨</span>
+                  <span className="slabel-num">5</span>Current Price (If inaccurate) &nbsp;
+                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
                 </div>
                 <input 
                   className="input" 
                   type="number"
-                  placeholder="The price you bought at..." 
-                  value={entryPrice} 
-                  onChange={e => setEntryPrice(e.target.value)} 
+                  placeholder={livePrice ? `Live: ₨${livePrice}` : "Optional override..."} 
+                  value={manualPrice} 
+                  onChange={e => setManualPrice(e.target.value)} 
                 />
               </div>
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">6</span>What are you trying to achieve? &nbsp;
+                  <span className="slabel-num">6</span>Your Entry/Buy Price &nbsp;
                   <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
                 </div>
-                <input className="input" placeholder="e.g. Trying to find long term compounding compounders..." value={notes} onChange={e => setNotes(e.target.value)} />
+                <input 
+                  className="input" 
+                  type="number"
+                  placeholder="Price you already paid..." 
+                  value={entryPrice} 
+                  onChange={e => setEntryPrice(e.target.value)} 
+                />
               </div>
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 28 }}>
+              <div className="slabel">
+                <span className="slabel-num">7</span>What are you trying to achieve? &nbsp;
+                <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
+              </div>
+              <input className="input" placeholder="e.g. Trying to find long term compounding compounders..." value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
 
             <div className="summary-bar">

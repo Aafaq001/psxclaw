@@ -9,7 +9,7 @@ export async function GET(request) {
   }
 
   try {
-    const yahooSymbol = symbol.toUpperCase() + '.KA';
+    let yahooSymbol = symbol.toUpperCase() === 'KSE100' ? '^KSE100' : symbol.toUpperCase() + '.KA';
     const url = 'https://query1.finance.yahoo.com/v8/finance/chart/'
       + yahooSymbol
       + '?interval=1m&range=1d';
@@ -36,11 +36,11 @@ export async function GET(request) {
 
   } catch (err) {
     const fallback = {
-      'SYS': '126.00', 'MEBL': '447.00', 'OGDC': '275.00',
+      'SYS': '136.00', 'MEBL': '445.00', 'OGDC': '265.00',
       'PSO': '352.00', 'HBL': '279.00', 'MCB': '361.00',
       'ENGRO': '281.00', 'ENGROH': '281.00', 'LUCK': '367.00',
       'TRG': '90.00', 'MARI': '609.00', 'UBL': '365.00',
-      'NESTLE': '7822.00', 'KSE100': '151707.00',
+      'NESTLE': '7822.00', 'KSE100': '147001.00',
     };
     const f = fallback[symbol.toUpperCase()];
     if (f) return NextResponse.json({ price: f, estimated: true });
