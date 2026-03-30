@@ -1,29 +1,28 @@
 import { NextResponse } from 'next/server';
+import { execSync } from 'child_process';
 
 /**
- * PSX REAL-TIME PRICE ENGINE (CLOUD-NATIVE)
- * This replaces the Python scraper to ensure compatibility with Vercel.
+ * ── PSX REAL-TIME PRICE ENGINE (REBUILT) ──
+ * This engine focuses exclusively on the official PSX floor feed
+ * to ensure absolute accuracy (matching the 136.45 price points).
+ * As requested, all "backups" and "fallbacks" have been removed.
  */
-async function fetchOfficialPSXPrice(symbol) {
+
+function fetchFromOfficialPSX(symbol) {
   try {
-    // Using Yahoo Finance for PSX (.KA) as a stable, Vercel-compatible source
-    const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.KA`, {
-      cache: 'no-store'
-    });
+    // We use the Python scraper which is optimized for the timeseries JSON extraction
+    const command = `python scripts/psx_scraper.py ${symbol}`;
+    const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
+    const data = JSON.parse(output);
 
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    const currentPrice = data.chart?.result?.[0]?.meta?.regularMarketPrice;
-
-    if (currentPrice) {
+    if (data && data.price) {
       return {
-        price: Number(currentPrice).toFixed(2),
+        price: Number(data.price).toFixed(2),
         source: 'Official PSX Floor (Real-Time)'
       };
     }
   } catch (err) {
-    console.error("PSX Fetch Error:", err);
+    console.error("Official PSX Fetch Error:", err);
   }
   return null;
 }
@@ -36,16 +35,16 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Symbol required' }, { status: 400 });
   }
 
-  // Attempt the fetch using native Node.js logic
-  const priceData = await fetchOfficialPSXPrice(symbol);
+  // ATTEMPT OFFICIAL FETCH (CLEAN SLATE LOGIC)
+  const officialData = fetchFromOfficialPSX(symbol);
 
-  if (priceData) {
-    return NextResponse.json(priceData);
+  if (officialData) {
+    return NextResponse.json(officialData);
   }
 
-  // Fallback error if the data source is unreachable
+  // If the official feed is down, we return an error instead of a potentially wrong backup.
   return NextResponse.json({
-    error: 'Official PSX price currently unavailable.',
+    error: 'Official PSX price currently unavailable. Please check the PSX Data Portal manually.',
     symbol
   }, { status: 502 });
 }
