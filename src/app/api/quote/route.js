@@ -29,22 +29,24 @@ function fetchFromOfficialPSX(symbol) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const symbol = searchParams.get('symbol')?.toUpperCase();
+  const symbol = searchParams.get('symbol')?.toUpperCase() || 'PSX';
 
-  if (!symbol) {
-    return NextResponse.json({ error: 'Symbol required' }, { status: 400 });
+  try {
+    // 1. Determine the base URL (Vercel uses HTTPS)
+    const host = request.headers.get('host');
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    // 2. Fetch from your NEW Python API endpoint
+    const response = await fetch(`${protocol}://${host}/api/python/psx_scraper?symbol=${symbol}`);
+    const data = await response.json();
+
+    if (data && data.price) {
+      return NextResponse.json({
+        price: data.price,
+        source: 'Official PSX Floor (Real-Time)'
+      });
+    }
+  } catch (err) {
+    console.error("Official PSX price currently unavailable. Please check the PSX Data Portal manually.:", err);
   }
-
-  // ATTEMPT OFFICIAL FETCH (CLEAN SLATE LOGIC)
-  const officialData = fetchFromOfficialPSX(symbol);
-
-  if (officialData) {
-    return NextResponse.json(officialData);
-  }
-
-  // If the official feed is down, we return an error instead of a potentially wrong backup.
-  return NextResponse.json({
-    error: 'Official PSX price currently unavailable. Please check the PSX Data Portal manually.',
-    symbol
-  }, { status: 502 });
 }
