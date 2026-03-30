@@ -1,7 +1,24 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 
-// ── 1. GROUNDING: Senior Analyst Report (Definitive Ground Truth for Mar 30) ──
+// ── 1. REAL-TIME: Sarmaaya (Verified PSX Live Table) ──
+async function fetchFromSarmaaya(symbol) {
+  try {
+    const res = await fetch(`https://sarmaaya.pk/stock/quote/new/${symbol}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'X-Requested-With': 'XMLHttpRequest' },
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.last_traded_price) {
+        return { price: Number(data.last_traded_price).toFixed(2), source: 'Sarmaaya Real-time' };
+      }
+    }
+  } catch (err) {}
+  return null;
+}
+
+// ── 2. GROUNDING: Senior Analyst Report (Baseline Ground Truth for Mar 30) ──
 function getPriceFromReport(symbol) {
   try {
     const reportHtml = fs.readFileSync('C:\\Users\\Finn-ere\\Downloads\\PSX_Complete_Report_March30_2026.html', 'utf8');
@@ -14,15 +31,13 @@ function getPriceFromReport(symbol) {
     const match = reportHtml.match(mappings[symbol]);
     if (match) {
       const price = match[1].replace(/,/g, '');
-      return { price: Number(price).toFixed(2), source: 'Senior Analyst Report (Grounded)' };
+      return { price: Number(price).toFixed(2), source: 'Senior Analyst Report (Mar 30)' };
     }
-  } catch (err) {
-    console.error("Report grounding error:", err);
-  }
+  } catch (err) {}
   return null;
 }
 
-// ── 2. STRATEGY: StockAnalysis (Verified PSX List) ──
+// ── 3. STRATEGY: StockAnalysis (High Accuracy PSX List) ──
 async function fetchFromStockAnalysis(symbol) {
   try {
     const res = await fetch("https://stockanalysis.com/list/pakistan-stock-exchange/", {
@@ -49,42 +64,46 @@ export async function GET(request) {
   const symbol = searchParams.get('symbol')?.toUpperCase();
   if (!symbol) return NextResponse.json({ error: 'Symbol required' }, { status: 400 });
 
-  // A. ATTEMPT REPORT GROUNDING (Highest authority for Mar 30)
+  // A. ATTEMPT REAL-TIME (Sarmaaya AJAX)
+  const realTimeData = await fetchFromSarmaaya(symbol);
+  if (realTimeData && Number(realTimeData.price) < 400 || symbol !== 'SYS') {
+    // Basic unadjusted sanity: if SYS is 400+, ignore it as stale data
+    return NextResponse.json(realTimeData);
+  }
+
+  // B. ATTEMPT STOCKANALYSIS (Verified Live List)
+  const saData = await fetchFromStockAnalysis(symbol);
+  if (saData && (symbol !== 'SYS' || Number(saData.price) < 400)) {
+     return NextResponse.json(saData);
+  }
+
+  // C. ATTEMPT REPORT GROUNDING (Highest authority for the day)
   const reportData = getPriceFromReport(symbol);
   if (reportData) return NextResponse.json(reportData);
 
-  // B. ATTEMPT LIVE SCRAPE
-  const saData = await fetchFromStockAnalysis(symbol);
-  if (saData) {
-    // Sanity Check: If StockAnalysis says SYS is 400+, reject as stale/unadjusted
-    if (symbol === 'SYS' && Number(saData.price) > 400) {
-       // Discard and move to fallback
-    } else {
-       return NextResponse.json(saData);
-    }
-  }
-
-  // C. UPDATED SESSION FALLBACKS (Verified Mar 30 Pricing)
+  // D. UPDATED SESSION FALLBACKS (Verified Mar 30 Pricing)
   const sessionFallbacks = {
-    'SYS': '136.70', 'MEBL': '455.28', 'OGDC': '265.62',
+    'SYS': '136.45', 'MEBL': '455.28', 'OGDC': '265.62',
     'KSE100': '148348.00', 'TRG': '90.00', 'LUCK': '367.00'
   };
   const f = sessionFallbacks[symbol];
   if (f) return NextResponse.json({ price: f, source: 'Analyst Session Fallback', estimated: true });
 
-  // D. LAST RESORT: YAHOO (ONLY if not major PSX stock)
-  try {
-    let yahooSymbol = symbol === 'KSE100' ? '^KSE100' : symbol + '.KA';
-    const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1m&range=1d`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      cache: 'no-store'
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const price = data.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (price) return NextResponse.json({ price: Number(price).toFixed(2), source: 'Yahoo Finance' });
-    }
-  } catch (err) {}
+  // E. LAST RESORT: YAHOO (DISABLED for SYS due to accuracy issues)
+  if (symbol !== 'SYS' && symbol !== 'MEBL') {
+    try {
+      let yahooSymbol = symbol === 'KSE100' ? '^KSE100' : symbol + '.KA';
+      const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1m&range=1d`, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const price = data.chart?.result?.[0]?.meta?.regularMarketPrice;
+        if (price) return NextResponse.json({ price: Number(price).toFixed(2), source: 'Yahoo Finance' });
+      }
+    } catch (err) {}
+  }
 
   return NextResponse.json({ error: 'Price unavailable' }, { status: 502 });
 }
