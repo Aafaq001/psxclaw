@@ -12,10 +12,11 @@ export async function GET(request) {
     const yahooSymbol = symbol.toUpperCase() + '.KA';
     const url = 'https://query1.finance.yahoo.com/v8/finance/chart/'
       + yahooSymbol
-      + '?interval=1d&range=5d';
+      + '?interval=1m&range=1d';
 
     const response = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      cache: 'no-store'
     });
 
     if (!response.ok) throw new Error('Yahoo fetch failed');

@@ -204,9 +204,9 @@ export default function PSXClaw() {
   const [strategy, setStrategy] = useState("DCA");
   const [timeframe, setTimeframe] = useState("3 Months");
   const [risk, setRisk] = useState("Moderate");
+  const [entryPrice, setEntryPrice] = useState("");
 
-  // States for Price and Validation
-  const [price, setPrice] = useState("");
+  // States for Validation
   const [livePrice, setLivePrice] = useState(null);
   const [isValidTicker, setIsValidTicker] = useState(true);
 
@@ -221,7 +221,7 @@ export default function PSXClaw() {
   const activeTicker = custom.trim().toUpperCase() || ticker;
   const stockData = STOCKS.find(s => s.ticker === activeTicker);
   const stratData = STRATEGIES.find(s => s.value === strategy);
-  const finalPrice = price || livePrice || "";
+  const finalPrice = livePrice || "";
 
   const LOAD_STEPS = ["Reading inputs", "Building prompt", "Consulting AI", "Formatting report"];
 
@@ -273,42 +273,44 @@ export default function PSXClaw() {
   }, [report]);
 
   // ── 2. Build Prompt (Feeds current price to Claude) ──
-  const buildPrompt = () => `You are a Senior PSX (Pakistan Stock Exchange) Equity Analyst with 15+ years covering KSE-100 stocks. Your analysis is rigorous, direct, and trusted by institutional investors in Pakistan.
-
+  const buildPrompt = () => `You are a Senior PSX Equity Analyst. 
 Generate a comprehensive investment analysis report for:
-
 STOCK: ${activeTicker}${stockData ? ` — ${stockData.name} (${stockData.sector} sector)` : ""}
-STRATEGY: ${stratData?.label}
-INVESTMENT HORIZON: ${timeframe}
+STRATEGY & TIMEFRAME: Apply the ${stratData?.label} analysis strategy targeting a ${timeframe} investment horizon. You must use the best proven analysis models for this strategy.
 RISK PROFILE: ${risk}
 ${finalPrice ? `CURRENT MARKET PRICE: ₨${finalPrice}` : ""}
-${notes ? `ADDITIONAL CONTEXT FROM INVESTOR: ${notes}` : ""}
+${entryPrice ? `INVESTOR ENTRY PRICE: ₨${entryPrice}` : ""}
+${notes ? `INVESTOR INTENTION/GOAL: ${notes}` : ""}
+
+Ensure the entire report is written in extremely simple, easy-to-understand language.
 
 Use these EXACT section headers (## format):
 
-## EXECUTIVE SUMMARY
-Write 2–3 sentences giving a direct, high-conviction verdict on this stock for the stated strategy and timeframe. Lead with the conclusion.
+## 1. EXECUTIVE SUMMARY
+- Brief overview of the business.
+- Provide a concise thesis based on the current context.
 
-## INVESTMENT THESIS
-Explain why this stock does or does not suit the stated strategy. Cover: sector dynamics in Pakistan's current macro environment, competitive positioning, tailwinds and headwinds.
+## 2. KSE-100 & MACRO ENVIRONMENT
+- Mention the KSE-100 current price explicitly based on the injected context.
+- Mention the current Brent Oil prices and Gold (AUXUSD/XAUUSD) prices. Explain briefly how these impact the stock.
 
-## RISK ANALYSIS
-List exactly 4 risks, each with a rating (Low / Medium / High). Include currency risk, regulatory/political risk, and sector-specific risks. Format each as a bullet.
+## 3. TECHNICAL LEVELS & PRICING
+- Provide the exact All-Time High price vs the current market price or Buy Price.
+- If an Entry Price was provided (₨${entryPrice}), calculate the current Profit/Loss percentage and provide a targeted "Hold vs. Exit" recommendation based on the entry impact.
+- Explicitly list all major Resistances and Supports. Ensure you extract these accurately from the provided Analyst Report Context if available.
 
-## TECHNICAL OVERVIEW
-Key support and resistance levels to watch. Volume trend and momentum signals relevant to KSE-100. ${finalPrice ? `Reference current price ₨${finalPrice} when discussing levels.` : "Discuss general price behaviour."} Include what a breakout or breakdown scenario looks like.
+## 4. NEWS & CATALYSTS
+- Check all the news sources in the provided Context and provide a report containing all the mentioned news sources and references explicitly cited.
+- Explain the recent catalysts based on news.
 
-## STRATEGY-SPECIFIC GUIDANCE
-Concrete, actionable steps for ${stratData?.label}:
-- Entry approach (price levels, conditions)
-- Suggested position sizing (% of portfolio)
-- Exit criteria and stop-loss level
-- Expected return range for this timeframe
+## 5. STRATEGY ANALYSIS (${stratData?.label.toUpperCase()})
+- Based solely on the user-selected timeframe (${timeframe}), apply your chosen proven analysis strategy/model to determine viability.
 
-## VERDICT
-State clearly: BUY / HOLD / AVOID — with a confidence level (Low / Medium / High). Give one decisive sentence explaining the call. Be direct. Do not hedge excessively.
-
-Style rules: Use Pakistani Rupee ₨ for all prices. Reference KSE-100 context throughout. Write professionally but clearly.`;
+## 6. FINAL VERDICT & SUMMARY
+- End the report with a strict bulleted Summary output section.
+- Tell the user exactly what price to buy at and if they should pursue it.
+- Clearly state BUY, HOLD, or SELL.
+`;
 
   // ── 3. Call Existing Vercel/Claude API ──
   const generate = async () => {
@@ -403,6 +405,12 @@ Style rules: Use Pakistani Rupee ₨ for all prices. Reference KSE-100 context t
                 ⚠ Invalid or unrecognised KSE ticker.
               </span>
             )}
+            
+            {isValidTicker && activeTicker && livePrice && (
+              <div style={{ marginBottom: 28, fontSize: 14, color: 'var(--green)', fontWeight: 600 }}>
+                Live Price for {activeTicker}: ₨{livePrice}
+              </div>
+            )}
 
             <hr className="section-divider" />
 
@@ -444,36 +452,26 @@ Style rules: Use Pakistani Rupee ₨ for all prices. Reference KSE-100 context t
 
             <hr className="section-divider" />
 
-            <div className="row2" style={{ marginBottom: 28 }}>
+            <div className="row2" style={{ marginBottom: 28, gridTemplateColumns: "1fr 1fr" }}>
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">5</span>Current Market Price ₨ &nbsp;
-                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
+                  <span className="slabel-num">5</span>Buy Price (Optional) &nbsp;
+                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>₨</span>
                 </div>
-                {/* Price input auto-fills if livePrice is fetched, unless user overrides */}
-                <input
-                  className="input"
+                <input 
+                  className="input" 
                   type="number"
-                  placeholder={livePrice ? `Live: ₨${livePrice} (Type to override)` : "e.g. 125.50"}
-                  value={price}
-                  onChange={e => setPrice(e.target.value)}
-                  min="0"
+                  placeholder="The price you bought at..." 
+                  value={entryPrice} 
+                  onChange={e => setEntryPrice(e.target.value)} 
                 />
-                <div style={{ minHeight: '14px', marginTop: '2px' }}>
-                  {livePrice && !price && (
-                    <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600 }}>
-                      ✓ Using current market value
-                    </span>
-                  )}
-                </div>
               </div>
-
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">6</span>Your Context &nbsp;
+                  <span className="slabel-num">6</span>What are you trying to achieve? &nbsp;
                   <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
                 </div>
-                <input className="input" placeholder="e.g. Waiting for post-Eid dip..." value={notes} onChange={e => setNotes(e.target.value)} />
+                <input className="input" placeholder="e.g. Trying to find long term compounding compounders..." value={notes} onChange={e => setNotes(e.target.value)} />
               </div>
             </div>
 
@@ -547,7 +545,8 @@ Style rules: Use Pakistani Rupee ₨ for all prices. Reference KSE-100 context t
                   <span className="rh-tag">{stratData?.label}</span>
                   <span className="rh-tag">{timeframe}</span>
                   <span className="rh-tag">{risk} risk</span>
-                  {finalPrice && <span className="rh-tag">₨{finalPrice}</span>}
+                  {finalPrice && <span className="rh-tag">CMP: ₨{finalPrice}</span>}
+                  {entryPrice && <span className="rh-tag">Entry: ₨{entryPrice}</span>}
                 </div>
               </div>
             </div>
