@@ -69,7 +69,7 @@ export async function POST(req) {
     // Read static HTML report
     let reportText = "";
     try {
-      const filePath = path.join(process.cwd(), 'scripts', 'scripts\PSX_Complete_Report_March30_2026.html');
+      const filePath = path.join(process.cwd(), 'scripts', 'PSX_Complete_Report_March30_2026.html');
       const reportHtml = fs.readFileSync(filePath, 'utf8');
       // Extremely basic regex to strip HTML tags and squish spaces
       reportText = reportHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
