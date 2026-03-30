@@ -206,6 +206,7 @@ export default function PSXClaw() {
   const [risk, setRisk] = useState("Moderate");
   const [entryPrice, setEntryPrice] = useState("");
   const [manualPrice, setManualPrice] = useState("");
+  const [priceSource, setPriceSource] = useState("");
 
   // States for Validation
   const [livePrice, setLivePrice] = useState(null);
@@ -248,7 +249,14 @@ export default function PSXClaw() {
         const res = await fetch(`/api/quote?symbol=${activeTicker}`);
         if (res.ok) {
           const data = await res.json();
-          setLivePrice(data.price);
+          if (data.price) {
+            setLivePrice(data.price);
+            setPriceSource(data.source || "");
+            setError(null);
+          } else {
+            setLivePrice(null);
+            setPriceSource("");
+          }
         }
       } catch (err) {
         console.error("Price fetch failed", err);
@@ -410,6 +418,7 @@ Use these EXACT section headers (## format):
             {isValidTicker && activeTicker && livePrice && (
               <div style={{ marginBottom: 28, fontSize: 13, color: 'var(--green)', fontWeight: 500, background: 'var(--green-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--green-bd)', display: 'inline-block' }}>
                 <span style={{ opacity: 0.8 }}>Live {activeTicker}:</span> ₨{livePrice}
+                {priceSource && <span style={{ marginLeft: 8, paddingLeft: 8, borderLeft: '1px solid rgba(0,0,0,0.1)', opacity: 0.6, fontSize: 11 }}>{priceSource}</span>}
               </div>
             )}
 
