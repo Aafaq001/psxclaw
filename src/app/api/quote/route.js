@@ -122,18 +122,23 @@ export async function GET(request) {
 
   try {
     if (symbol === 'KSE100') {
-      const yahooData = await fetchYahooFinance('^KARACHI');
-      if (!yahooData) throw new Error("Yahoo fetch failed");
+      const [officialData, yahooData] = await Promise.all([
+        fetchFromOfficialPSX("KSE100"),
+        fetchYahooFinance('^KARACHI')
+      ]);
+      
+      if (!officialData && !yahooData) throw new Error("Yahoo and PSX fetch failed for KSE100");
+      
       return NextResponse.json({
-         price: yahooData.price,
-         change: yahooData.regularMarketChange,
-         changePercent: yahooData.regularMarketChangePercent,
-         fiftyTwoWeekHigh: yahooData.fiftyTwoWeekHigh,
-         fiftyTwoWeekLow: yahooData.fiftyTwoWeekLow,
-         regularMarketChange: yahooData.regularMarketChange,
-         regularMarketChangePercent: yahooData.regularMarketChangePercent,
-         previousClose: yahooData.previousClose,
-         source: "Yahoo Finance"
+         price: officialData?.price || yahooData?.price,
+         change: yahooData?.regularMarketChange,
+         changePercent: yahooData?.regularMarketChangePercent,
+         fiftyTwoWeekHigh: yahooData?.fiftyTwoWeekHigh,
+         fiftyTwoWeekLow: yahooData?.fiftyTwoWeekLow,
+         regularMarketChange: yahooData?.regularMarketChange,
+         regularMarketChangePercent: yahooData?.regularMarketChangePercent,
+         previousClose: yahooData?.previousClose,
+         source: officialData ? "Official PSX Floor" : "Yahoo Finance"
       });
     }
 
