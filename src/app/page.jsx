@@ -20,24 +20,115 @@ const STOCKS = [
 
 // Using a Set for O(1) lookup efficiency during validation
 const VALID_KSE_TICKERS = new Set([
-  "SYS", "MEBL", "OGDC", "PSO", "HBL", "MCB", "ENGRO", "LUCK", "TRG", "MARI", "UBL", "NESTLE",
-  "HUBC", "FFC", "EFERT", "POL", "PPL", "BAHL", "MTL", "DAWH", "FCEPL", "THALL", "INIL", "ISL",
-  "PSMC", "INDU", "HCAR", "NATF", "SEARL", "AGP", "ABOT", "GLAXO", "MUREB", "PAEL", "COLG",
-  "BOP", "NBP", "BAFL", "AKBL", "SNBL", "FABL", "DGKC", "FCCL", "CHCC", "PIOC", "MLCF", "KOHC",
-  "KAPCO", "KEL", "SNGP", "SSGC", "PRL", "ATRL", "NRL", "CNERGY", "LOTCHEM", "EPCL", "PKGS",
-  "BATA", "SRVI", "TGL", "GTYR", "EFOODS", "AVN", "NETSOL", "PTC", "WTL", "KOSM", "GGL", "HASCOL"
+  "SYS",
+  "MEBL",
+  "OGDC",
+  "PSO",
+  "HBL",
+  "MCB",
+  "ENGRO",
+  "LUCK",
+  "TRG",
+  "MARI",
+  "UBL",
+  "NESTLE",
+  "HUBC",
+  "FFC",
+  "EFERT",
+  "POL",
+  "PPL",
+  "BAHL",
+  "MTL",
+  "DAWH",
+  "FCEPL",
+  "THALL",
+  "INIL",
+  "ISL",
+  "PSMC",
+  "INDU",
+  "HCAR",
+  "NATF",
+  "SEARL",
+  "AGP",
+  "ABOT",
+  "GLAXO",
+  "MUREB",
+  "PAEL",
+  "COLG",
+  "BOP",
+  "NBP",
+  "BAFL",
+  "AKBL",
+  "SNBL",
+  "FABL",
+  "DGKC",
+  "FCCL",
+  "CHCC",
+  "PIOC",
+  "MLCF",
+  "KOHC",
+  "KAPCO",
+  "KEL",
+  "SNGP",
+  "SSGC",
+  "PRL",
+  "ATRL",
+  "NRL",
+  "CNERGY",
+  "LOTCHEM",
+  "EPCL",
+  "PKGS",
+  "BATA",
+  "SRVI",
+  "TGL",
+  "GTYR",
+  "EFOODS",
+  "AVN",
+  "NETSOL",
+  "PTC",
+  "WTL",
+  "KOSM",
+  "GGL",
+  "HASCOL",
   // Add any other KSE tickers here
 ]);
 
 const STRATEGIES = [
-  { value: "DCA", label: "Dollar-Cost Averaging", desc: "Systematic entry in tranches" },
-  { value: "SWING", label: "Swing Trading", desc: "Short-term price movements" },
-  { value: "VALUE", label: "Value Investing", desc: "Undervalued fundamentals" },
-  { value: "GROWTH", label: "Growth Investing", desc: "Long-term capital appreciation" },
-  { value: "DIVIDEND", label: "Dividend Income", desc: "Regular yield generation" },
+  {
+    value: "DCA",
+    label: "Dollar-Cost Averaging",
+    desc: "Systematic entry in tranches",
+  },
+  {
+    value: "SWING",
+    label: "Swing Trading",
+    desc: "Short-term price movements",
+  },
+  {
+    value: "VALUE",
+    label: "Value Investing",
+    desc: "Undervalued fundamentals",
+  },
+  {
+    value: "GROWTH",
+    label: "Growth Investing",
+    desc: "Long-term capital appreciation",
+  },
+  {
+    value: "DIVIDEND",
+    label: "Dividend Income",
+    desc: "Regular yield generation",
+  },
 ];
 
-const TIMEFRAMES = ["1 Week", "1 Month", "3 Months", "6 Months", "1 Year", "3+ Years"];
+const TIMEFRAMES = [
+  "1 Week",
+  "1 Month",
+  "3 Months",
+  "6 Months",
+  "1 Year",
+  "3+ Years",
+];
 const RISK_LEVELS = ["Conservative", "Moderate", "Aggressive"];
 
 // ─── Styles (Unchanged) ──────────────────────────────────────────────────────
@@ -168,9 +259,15 @@ function renderReport(text) {
       .replace(/\*(.+?)\*/g, "<em>$1</em>");
 
     if (/^#{1,2}\s/.test(line)) {
-      if (inUL) { html += "</ul>"; inUL = false; }
+      if (inUL) {
+        html += "</ul>";
+        inUL = false;
+      }
       const heading = line.replace(/^#{1,2}\s/, "");
-      if (inVerdict) { html += "</div>"; inVerdict = false; }
+      if (inVerdict) {
+        html += "</div>";
+        inVerdict = false;
+      }
       if (/verdict/i.test(heading)) {
         html += `<h2>${heading}</h2><div class="verdict-box">`;
         inVerdict = true;
@@ -178,15 +275,27 @@ function renderReport(text) {
         html += `<h2>${heading}</h2>`;
       }
     } else if (/^###\s/.test(line)) {
-      if (inUL) { html += "</ul>"; inUL = false; }
+      if (inUL) {
+        html += "</ul>";
+        inUL = false;
+      }
       html += `<h3>${line.replace(/^###\s/, "")}</h3>`;
     } else if (/^[-•*]\s/.test(line)) {
-      if (!inUL) { html += "<ul>"; inUL = true; }
+      if (!inUL) {
+        html += "<ul>";
+        inUL = true;
+      }
       html += `<li>${line.replace(/^[-•*]\s/, "")}</li>`;
     } else if (line.trim() === "") {
-      if (inUL) { html += "</ul>"; inUL = false; }
+      if (inUL) {
+        html += "</ul>";
+        inUL = false;
+      }
     } else if (line.trim()) {
-      if (inUL) { html += "</ul>"; inUL = false; }
+      if (inUL) {
+        html += "</ul>";
+        inUL = false;
+      }
       html += `<p>${line}</p>`;
     }
   }
@@ -207,6 +316,7 @@ export default function PSXClaw() {
   const [entryPrice, setEntryPrice] = useState("");
   const [manualPrice, setManualPrice] = useState("");
   const [priceSource, setPriceSource] = useState("");
+  const [priceLoading, setPriceLoading] = useState(false);
 
   // States for Validation
   const [livePrice, setLivePrice] = useState(null);
@@ -214,6 +324,8 @@ export default function PSXClaw() {
 
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [marketData, setMarketData] = useState({ kse: null, gold: null });
+  const [verifiedData, setVerifiedData] = useState(null);
   const [loadStep, setLoadStep] = useState(0);
   const [report, setReport] = useState("");
   const [error, setError] = useState("");
@@ -221,11 +333,17 @@ export default function PSXClaw() {
   const reportRef = useRef(null);
 
   const activeTicker = custom.trim().toUpperCase() || ticker;
-  const stockData = STOCKS.find(s => s.ticker === activeTicker);
-  const stratData = STRATEGIES.find(s => s.value === strategy);
+  const stockData = STOCKS.find((s) => s.ticker === activeTicker);
+  const stratData = STRATEGIES.find((s) => s.value === strategy);
   const finalPrice = manualPrice || livePrice || "";
 
-  const LOAD_STEPS = ["Reading inputs", "Building prompt", "Consulting AI", "Formatting report"];
+  const LOAD_STEPS = [
+    "Fetching live price data",
+    "Verifying price accuracy",
+    "Bull analyst reviewing",
+    "Bear analyst reviewing",
+    "Synthesising final report",
+  ];
 
   // ── 1. Efficient Validation & Price Fetch (Debounced) ──
   useEffect(() => {
@@ -243,10 +361,13 @@ export default function PSXClaw() {
 
     // Debounce the price fetch so we don't spam your API route
     const fetchTimer = setTimeout(async () => {
+      setPriceLoading(true);
       try {
-        // NOTE: Uses your existing route setup. 
+        // NOTE: Uses your existing route setup.
         // Adjust the URL if your existing backend uses a different path for fetching live prices.
-        const res = await fetch(`/api/quote?symbol=${activeTicker}`);
+        const res = await fetch(
+          `/api/quote?symbol=${encodeURIComponent(activeTicker)}`,
+        );
         if (res.ok) {
           const data = await res.json();
           if (data.price) {
@@ -256,10 +377,21 @@ export default function PSXClaw() {
           } else {
             setLivePrice(null);
             setPriceSource("");
+            setError("Price data unavailable for this symbol");
           }
+        } else {
+          const errorData = await res.json().catch(() => ({}));
+          setLivePrice(null);
+          setPriceSource("");
+          setError(errorData.error || `Failed to fetch price: ${res.status}`);
         }
       } catch (err) {
         console.error("Price fetch failed", err);
+        setLivePrice(null);
+        setPriceSource("");
+        setError("Network error: Unable to fetch price data");
+      } finally {
+        setPriceLoading(false);
       }
     }, 500); // 500ms delay
 
@@ -268,16 +400,51 @@ export default function PSXClaw() {
 
   // Simulate loading steps
   useEffect(() => {
-    if (!loading) { setLoadStep(0); return; }
+    if (!loading) {
+      setLoadStep(0);
+      return;
+    }
     const t = setInterval(() => {
-      setLoadStep(p => (p < LOAD_STEPS.length - 1 ? p + 1 : p));
+      setLoadStep((p) => (p < LOAD_STEPS.length - 1 ? p + 1 : p));
     }, 900);
     return () => clearInterval(t);
-  }, [loading]);
+  }, [loading, LOAD_STEPS.length]);
+
+  // Fetch KSE100 and Gold periodically
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        const [kseRes, goldRes] = await Promise.all([
+          fetch("/api/quote?symbol=KSE100"),
+          fetch("/api/quote?symbol=GOLD")
+        ]);
+        const kseData = await kseRes.json();
+        const goldData = await goldRes.json();
+        
+        setMarketData({
+          kse: kseRes.ok ? kseData : null,
+          gold: goldRes.ok ? goldData : null
+        });
+      } catch (e) {
+        console.error("Failed to fetch market data", e);
+      }
+    };
+    
+    fetchMarketData();
+    const interval = setInterval(fetchMarketData, 120000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (report && reportRef.current) {
-      setTimeout(() => reportRef.current.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      setTimeout(
+        () =>
+          reportRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
+        100,
+      );
     }
   }, [report]);
 
@@ -327,8 +494,13 @@ Use these EXACT section headers (## format):
     setLoading(true);
     setError("");
     setReport("");
+    setVerifiedData(null);
     setTimestamp(
-      new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi", dateStyle: "medium", timeStyle: "short" }) + " PKT"
+      new Date().toLocaleString("en-PK", {
+        timeZone: "Asia/Karachi",
+        dateStyle: "medium",
+        timeStyle: "short",
+      }) + " PKT",
     );
 
     try {
@@ -345,10 +517,12 @@ Use these EXACT section headers (## format):
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `Server responded with ${res.status}`);
-      const text = data.content?.[0]?.text || "";
+      if (!res.ok)
+        throw new Error(data.error || `Server responded with ${res.status}`);
+      const text = data.content?.[0]?.text || data.report || "";
       if (!text) throw new Error("Empty response from AI.");
       setReport(text);
+      if (data.verifiedData) setVerifiedData(data.verifiedData);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -357,7 +531,8 @@ Use these EXACT section headers (## format):
   };
 
   const reset = () => {
-    setReport(""); setError("");
+    setReport("");
+    setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -368,30 +543,65 @@ Use these EXACT section headers (## format):
       <header className="hdr">
         <div className="logo">
           <div className="logo-mark">P</div>
-          <span className="logo-name">PSX<span>Claw</span></span>
+          <span className="logo-name">
+            PSX<span>Claw</span>
+          </span>
         </div>
         <span className="hdr-tag">KSE-100 AI Analyst</span>
       </header>
+
+      <div style={{ background: 'var(--card)', padding: '6px clamp(16px, 4vw, 48px)', borderBottom: '1px solid var(--border)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '20px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+        {marketData.kse ? (
+          <span style={{ color: "var(--text2)" }}>
+            <strong>KSE-100</strong> {" "}
+            {Number(marketData.kse.price).toLocaleString()} {" "}
+            <span style={{ color: Number(marketData.kse.change) >= 0 ? 'var(--green)' : 'var(--red)' }}>
+              {Number(marketData.kse.change) >= 0 ? '▲' : '▼'} {Number(marketData.kse.change) > 0 ? '+' : ''}{marketData.kse.change || 0} ({(marketData.kse.changePercent || 0).toFixed(2)}%)
+            </span>
+          </span>
+        ) : (
+          <span style={{ color: "var(--text3)" }}>KSE-100 unavailable</span>
+        )}
+        <span style={{ color: 'var(--border2)' }}>|</span>
+        {marketData.gold ? (
+          <span style={{ color: "var(--text2)" }}>
+            <strong>Gold</strong> ${Number(marketData.gold.price).toLocaleString()}/oz
+          </span>
+        ) : (
+          <span style={{ color: "var(--text3)" }}>Gold unavailable</span>
+        )}
+      </div>
 
       {!report && (
         <>
           <div className="hero fade-up">
             <div className="hero-kicker">AI-Powered Equity Research</div>
-            <h1>Institutional-grade<br /><em>PSX analysis.</em></h1>
+            <h1>
+              Institutional-grade
+              <br />
+              <em>PSX analysis.</em>
+            </h1>
             <p className="hero-sub">
-              Select a stock, pick your strategy, and receive a structured analyst
-              report in seconds — no chatbot, no noise. Just clear investment guidance.
+              Select a stock, pick your strategy, and receive a structured
+              analyst report in seconds — no chatbot, no noise. Just clear
+              investment guidance.
             </p>
           </div>
 
           <div className="form-wrap fade-up">
-            <div className="slabel"><span className="slabel-num">1</span>Select Stock</div>
+            <div className="slabel">
+              <span className="slabel-num">1</span>Select Stock
+            </div>
             <div className="chip-grid">
-              {STOCKS.map(s => (
+              {STOCKS.map((s) => (
                 <div
                   key={s.ticker}
                   className={`chip ${ticker === s.ticker && !custom ? "active" : ""}`}
-                  onClick={() => { setTicker(s.ticker); setCustom(""); setIsValidTicker(true); }}
+                  onClick={() => {
+                    setTicker(s.ticker);
+                    setCustom("");
+                    setIsValidTicker(true);
+                  }}
                 >
                   <span className="chip-ticker">{s.ticker}</span>
                   <span className="chip-name">{s.name}</span>
@@ -402,31 +612,80 @@ Use these EXACT section headers (## format):
             {/* Input with visual error state */}
             <input
               className={`input ${!isValidTicker && custom.length > 0 ? "error" : ""}`}
-              style={{ marginTop: 10, marginBottom: !isValidTicker && custom ? 4 : 28 }}
+              style={{
+                marginTop: 10,
+                marginBottom: !isValidTicker && custom ? 4 : 28,
+              }}
               placeholder="Or type any KSE ticker — e.g. KOHC, PAEL, COLG..."
               value={custom}
-              onChange={e => setCustom(e.target.value.toUpperCase())}
+              onChange={(e) => setCustom(e.target.value.toUpperCase())}
               maxLength={8}
             />
             {/* Real-time Validation Warning */}
             {!isValidTicker && custom.length > 0 && (
-              <span style={{ fontSize: 12, color: 'var(--red)', display: 'block', marginBottom: 24, fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "var(--red)",
+                  display: "block",
+                  marginBottom: 24,
+                  fontWeight: 500,
+                }}
+              >
                 ⚠ Invalid or unrecognised KSE ticker.
               </span>
             )}
-            
-            {isValidTicker && activeTicker && livePrice && (
-              <div style={{ marginBottom: 28, fontSize: 13, color: 'var(--green)', fontWeight: 500, background: 'var(--green-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--green-bd)', display: 'inline-block' }}>
-                <span style={{ opacity: 0.8 }}>Live {activeTicker}:</span> ₨{livePrice}
-                {priceSource && <span style={{ marginLeft: 8, paddingLeft: 8, borderLeft: '1px solid rgba(0,0,0,0.1)', opacity: 0.6, fontSize: 11 }}>{priceSource}</span>}
+
+            {isValidTicker && activeTicker && (livePrice || priceLoading) && (
+              <div
+                style={{
+                  marginBottom: 28,
+                  fontSize: 13,
+                  color: "var(--green)",
+                  fontWeight: 500,
+                  background: "var(--green-bg)",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--green-bd)",
+                  display: "inline-block",
+                }}
+              >
+                <span style={{ opacity: 0.8 }}>
+                  {priceLoading ? "Fetching" : "Live"} {activeTicker}:
+                </span>{" "}
+                ₨
+                {priceLoading ? (
+                  <>
+                    <span className="dot">•</span>
+                    <span className="dot">•</span>
+                    <span className="dot">•</span>
+                  </>
+                ) : (
+                  livePrice
+                )}
+                {priceSource && !priceLoading && (
+                  <span
+                    style={{
+                      marginLeft: 8,
+                      paddingLeft: 8,
+                      borderLeft: "1px solid rgba(0,0,0,0.1)",
+                      opacity: 0.6,
+                      fontSize: 11,
+                    }}
+                  >
+                    {priceSource}
+                  </span>
+                )}
               </div>
             )}
 
             <hr className="section-divider" />
 
-            <div className="slabel" style={{ marginBottom: 12 }}><span className="slabel-num">2</span>Investment Strategy</div>
+            <div className="slabel" style={{ marginBottom: 12 }}>
+              <span className="slabel-num">2</span>Investment Strategy
+            </div>
             <div className="strategy-grid" style={{ marginBottom: 28 }}>
-              {STRATEGIES.map(s => (
+              {STRATEGIES.map((s) => (
                 <button
                   key={s.value}
                   className={`strat-btn ${strategy === s.value ? "active" : ""}`}
@@ -442,19 +701,35 @@ Use these EXACT section headers (## format):
 
             <div className="row2" style={{ marginBottom: 28 }}>
               <div className="input-group">
-                <div className="slabel"><span className="slabel-num">3</span>Investment Horizon</div>
+                <div className="slabel">
+                  <span className="slabel-num">3</span>Investment Horizon
+                </div>
                 <div className="pill-row">
-                  {TIMEFRAMES.map(t => (
-                    <button key={t} className={`pill ${timeframe === t ? "active" : ""}`} onClick={() => setTimeframe(t)}>{t}</button>
+                  {TIMEFRAMES.map((t) => (
+                    <button
+                      key={t}
+                      className={`pill ${timeframe === t ? "active" : ""}`}
+                      onClick={() => setTimeframe(t)}
+                    >
+                      {t}
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div className="input-group">
-                <div className="slabel"><span className="slabel-num">4</span>Risk Appetite</div>
+                <div className="slabel">
+                  <span className="slabel-num">4</span>Risk Appetite
+                </div>
                 <div className="pill-row">
-                  {RISK_LEVELS.map(r => (
-                    <button key={r} className={`pill ${risk === r ? "active" : ""}`} onClick={() => setRisk(r)}>{r}</button>
+                  {RISK_LEVELS.map((r) => (
+                    <button
+                      key={r}
+                      className={`pill ${risk === r ? "active" : ""}`}
+                      onClick={() => setRisk(r)}
+                    >
+                      {r}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -465,52 +740,104 @@ Use these EXACT section headers (## format):
             <div className="row2" style={{ marginBottom: 20 }}>
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">5</span>Current Price (If inaccurate) &nbsp;
-                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
+                  <span className="slabel-num">5</span>Current Price (If
+                  inaccurate) &nbsp;
+                  <span
+                    style={{
+                      color: "var(--text3)",
+                      letterSpacing: 0,
+                      fontWeight: 400,
+                      textTransform: "none",
+                    }}
+                  >
+                    optional
+                  </span>
                 </div>
-                <input 
-                  className="input" 
+                <input
+                  className="input"
                   type="number"
-                  placeholder={livePrice ? `Live: ₨${livePrice}` : "Optional override..."} 
-                  value={manualPrice} 
-                  onChange={e => setManualPrice(e.target.value)} 
+                  placeholder={
+                    livePrice ? `Live: ₨${livePrice}` : "Optional override..."
+                  }
+                  value={manualPrice}
+                  onChange={(e) => setManualPrice(e.target.value)}
                 />
               </div>
               <div className="input-group">
                 <div className="slabel">
-                  <span className="slabel-num">6</span>Your Entry/Buy Price &nbsp;
-                  <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
+                  <span className="slabel-num">6</span>Your Entry/Buy Price
+                  &nbsp;
+                  <span
+                    style={{
+                      color: "var(--text3)",
+                      letterSpacing: 0,
+                      fontWeight: 400,
+                      textTransform: "none",
+                    }}
+                  >
+                    optional
+                  </span>
                 </div>
-                <input 
-                  className="input" 
+                <input
+                  className="input"
                   type="number"
-                  placeholder="Price you already paid..." 
-                  value={entryPrice} 
-                  onChange={e => setEntryPrice(e.target.value)} 
+                  placeholder="Price you already paid..."
+                  value={entryPrice}
+                  onChange={(e) => setEntryPrice(e.target.value)}
                 />
               </div>
             </div>
 
             <div className="input-group" style={{ marginBottom: 28 }}>
               <div className="slabel">
-                <span className="slabel-num">7</span>What are you trying to achieve? &nbsp;
-                <span style={{ color: "var(--text3)", letterSpacing: 0, fontWeight: 400, textTransform: "none" }}>optional</span>
+                <span className="slabel-num">7</span>What are you trying to
+                achieve? &nbsp;
+                <span
+                  style={{
+                    color: "var(--text3)",
+                    letterSpacing: 0,
+                    fontWeight: 400,
+                    textTransform: "none",
+                  }}
+                >
+                  optional
+                </span>
               </div>
-              <input className="input" placeholder="e.g. Trying to find long term compounding compounders..." value={notes} onChange={e => setNotes(e.target.value)} />
+              <input
+                className="input"
+                placeholder="e.g. Trying to find long term compounding compounders..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </div>
 
             <div className="summary-bar">
-              <div className="sum-item"><span className="sum-key">Stock</span><span className="sum-val">{activeTicker}</span></div>
+              <div className="sum-item">
+                <span className="sum-key">Stock</span>
+                <span className="sum-val">{activeTicker}</span>
+              </div>
               <div className="sum-dot" />
-              <div className="sum-item"><span className="sum-key">Strategy</span><span className="sum-val">{stratData?.label}</span></div>
+              <div className="sum-item">
+                <span className="sum-key">Strategy</span>
+                <span className="sum-val">{stratData?.label}</span>
+              </div>
               <div className="sum-dot" />
-              <div className="sum-item"><span className="sum-key">Horizon</span><span className="sum-val">{timeframe}</span></div>
+              <div className="sum-item">
+                <span className="sum-key">Horizon</span>
+                <span className="sum-val">{timeframe}</span>
+              </div>
               <div className="sum-dot" />
-              <div className="sum-item"><span className="sum-key">Risk</span><span className="sum-val">{risk}</span></div>
+              <div className="sum-item">
+                <span className="sum-key">Risk</span>
+                <span className="sum-val">{risk}</span>
+              </div>
               {finalPrice && (
                 <>
                   <div className="sum-dot" />
-                  <div className="sum-item"><span className="sum-key">Price</span><span className="sum-val">₨{finalPrice}</span></div>
+                  <div className="sum-item">
+                    <span className="sum-key">Price</span>
+                    <span className="sum-val">₨{finalPrice}</span>
+                  </div>
                 </>
               )}
             </div>
@@ -524,7 +851,9 @@ Use these EXACT section headers (## format):
               {loading ? (
                 <>
                   Analysing {activeTicker}
-                  <span className="dot" /><span className="dot" /><span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
                 </>
               ) : (
                 `Generate ${activeTicker} Analysis →`
@@ -535,12 +864,17 @@ Use these EXACT section headers (## format):
               <div className="loading-card fade-up">
                 <div className="spinner-ring" />
                 <p className="loading-text">
-                  Consulting senior PSX analyst AI for <strong>{activeTicker}</strong>...
+                  Consulting senior PSX analyst AI for{" "}
+                  <strong>{activeTicker}</strong>...
                 </p>
                 <div className="loading-steps">
                   {LOAD_STEPS.map((s, i) => (
-                    <span key={i} className={`l-step ${i <= loadStep ? "done" : ""}`}>
-                      {i <= loadStep ? "✓ " : ""}{s}
+                    <span
+                      key={i}
+                      className={`l-step ${i <= loadStep ? "done" : ""}`}
+                    >
+                      {i <= loadStep ? "✓ " : ""}
+                      {s}
                     </span>
                   ))}
                 </div>
@@ -563,39 +897,89 @@ Use these EXACT section headers (## format):
             <div className="rh-left">
               <div className="rh-ticker">{activeTicker}</div>
               <div className="rh-meta">
-                <span className="rh-name">{stockData?.name || activeTicker}</span>
+                <span className="rh-name">
+                  {stockData?.name || activeTicker}
+                </span>
                 <div className="rh-tags">
                   <span className="rh-tag">{stockData?.sector || "KSE"}</span>
                   <span className="rh-tag">{stratData?.label}</span>
                   <span className="rh-tag">{timeframe}</span>
                   <span className="rh-tag">{risk} risk</span>
-                  {finalPrice && <span className="rh-tag">CMP: ₨{finalPrice}</span>}
-                  {entryPrice && <span className="rh-tag">Entry: ₨{entryPrice}</span>}
+                  {finalPrice && (
+                    <span className="rh-tag">CMP: ₨{finalPrice}</span>
+                  )}
+                  {entryPrice && (
+                    <span className="rh-tag">Entry: ₨{entryPrice}</span>
+                  )}
                 </div>
+                {verifiedData && (
+                  <div style={{ marginTop: '12px', fontSize: '13px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span>
+                      <strong>₨{verifiedData.livePrice}</strong>{' '}
+                      <span style={{ color: Number(verifiedData.regularMarketChange) >= 0 ? "var(--green)" : "var(--red)", fontWeight: 600 }}>
+                        {Number(verifiedData.regularMarketChange) >= 0 ? "▲" : "▼"} {Number(verifiedData.regularMarketChange) > 0 ? '+' : ''}{Number(verifiedData.regularMarketChangePercent || 0).toFixed(2)}% today
+                      </span>
+                    </span>
+                    <span style={{ color: "var(--text3)" }}>|</span>
+                    <span style={{ color: "var(--text3)" }}>52W: ₨{verifiedData.fiftyTwoWeekLow} – ₨{verifiedData.fiftyTwoWeekHigh}</span>
+                    <span style={{ color: "var(--text3)" }}>|</span>
+                    <span>
+                      Data: {verifiedData.dataConfidence === "Low" ? (
+                        <span style={{ color: "var(--red)", fontWeight: 600 }}>Approximate ⚠</span>
+                      ) : (
+                        <span style={{ color: "var(--green)", fontWeight: 600 }}>Verified ✓</span>
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="rh-right">
               <p className="rh-ts">
-                <strong>AI Analyst Report</strong><br />
+                <strong>AI Analyst Report</strong>
+                <br />
                 {timestamp}
               </p>
             </div>
           </div>
 
-          <div className="report-body" dangerouslySetInnerHTML={{ __html: renderReport(report) }} />
+          <div
+            className="report-body"
+            dangerouslySetInnerHTML={{ __html: renderReport(report) }}
+          />
 
-          <p style={{ fontSize: 11, color: "var(--text3)", marginTop: 16, lineHeight: 1.6 }}>
-            ⚠ This report is generated by AI and is for informational purposes only.
-            It does not constitute financial advice. Always do your own research before investing.
+          <p
+            style={{
+              fontSize: 11,
+              color: "var(--text3)",
+              marginTop: 16,
+              lineHeight: 1.6,
+            }}
+          >
+            ⚠ This report is generated by AI and is for informational purposes
+            only. It does not constitute financial advice. Always do your own
+            research before investing.
           </p>
 
           <div className="report-actions">
-            <button className="btn-outline" onClick={reset}>← New Analysis</button>
-            <button className="btn-outline" onClick={() => {
-              const text = document.querySelector(".report-body")?.innerText;
-              if (text) { navigator.clipboard?.writeText(text); alert("Report copied to clipboard!"); }
-            }}>Copy Report</button>
-            <button className="btn-outline" onClick={() => window.print()}>Print / Save PDF</button>
+            <button className="btn-outline" onClick={reset}>
+              ← New Analysis
+            </button>
+            <button
+              className="btn-outline"
+              onClick={() => {
+                const text = document.querySelector(".report-body")?.innerText;
+                if (text) {
+                  navigator.clipboard?.writeText(text);
+                  alert("Report copied to clipboard!");
+                }
+              }}
+            >
+              Copy Report
+            </button>
+            <button className="btn-outline" onClick={() => window.print()}>
+              Print / Save PDF
+            </button>
           </div>
         </div>
       )}
@@ -603,8 +987,8 @@ Use these EXACT section headers (## format):
       <footer className="footer">
         <span className="footer-text">PSXClaw © 2025 — KSE AI Analyst</span>
         <span className="footer-disc">
-          For informational use only. Not financial advice.
-          Investing in equities involves risk of loss.
+          For informational use only. Not financial advice. Investing in
+          equities involves risk of loss.
         </span>
       </footer>
     </>
